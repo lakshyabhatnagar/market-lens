@@ -8,15 +8,30 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
 import {LogOut} from "lucide-react";
 import NavItems from "@/components/NavItems";
 import {signOut} from "@/lib/actions/auth.actions";
 
+const AVATAR_COLORS = [
+    'bg-rose-600', 'bg-emerald-600', 'bg-violet-600', 'bg-amber-600',
+    'bg-cyan-600', 'bg-pink-600', 'bg-teal-600', 'bg-indigo-600',
+    'bg-orange-600', 'bg-sky-600', 'bg-fuchsia-600', 'bg-lime-600',
+];
+
+function getAvatarColor(name: string) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
 const UserDropdown = ({ user, initialStocks }: {user: User, initialStocks: StockWithWatchlistStatus[]}) => {
     const router = useRouter();
+    const avatarColor = getAvatarColor(user.name);
+    const initial = user.name.charAt(0).toUpperCase();
 
     const handleSignOut = async () => {
         await signOut();
@@ -27,12 +42,9 @@ const UserDropdown = ({ user, initialStocks }: {user: User, initialStocks: Stock
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-3 text-gray-4 hover:text-yellow-500">
-                    <Avatar className="h-8 w-8">
-                        <AvatarImage src="https://avatars.githubusercontent.com/u/153423955?s=280&v=4" />
-                        <AvatarFallback className="bg-yellow-500 text-yellow-900 text-sm font-bold">
-                            {user.name[0]}
-                        </AvatarFallback>
-                    </Avatar>
+                    <div className={`${avatarColor} h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0`}>
+                        {initial}
+                    </div>
                     <div className="hidden md:flex flex-col items-start">
                         <span className='text-base font-medium text-gray-400'>
                             {user.name}
@@ -43,12 +55,9 @@ const UserDropdown = ({ user, initialStocks }: {user: User, initialStocks: Stock
             <DropdownMenuContent className="text-gray-400">
                 <DropdownMenuLabel>
                     <div className="flex relative items-center gap-3 py-2">
-                        <Avatar className="h-10 w-10">
-                            <AvatarImage src="https://avatars.githubusercontent.com/u/153423955?s=280&v=4" />
-                            <AvatarFallback className="bg-yellow-500 text-yellow-900 text-sm font-bold">
-                                {user.name[0]}
-                            </AvatarFallback>
-                        </Avatar>
+                        <div className={`${avatarColor} h-10 w-10 rounded-full flex items-center justify-center text-white text-base font-bold shrink-0`}>
+                            {initial}
+                        </div>
                         <div className="flex flex-col">
                             <span className='text-base font-medium text-gray-400'>
                                 {user.name}

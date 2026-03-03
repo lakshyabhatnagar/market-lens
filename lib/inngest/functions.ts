@@ -1,10 +1,11 @@
 import {inngest} from "@/lib/inngest/client";
 import {NEWS_SUMMARY_EMAIL_PROMPT, PERSONALIZED_WELCOME_EMAIL_PROMPT} from "@/lib/inngest/prompts";
 import {sendNewsSummaryEmail, sendWelcomeEmail} from "@/lib/nodemailer";
-import {getAllUsersForNewsEmail} from "@/lib/actions/user.actions";
-import { getWatchlistSymbolsByEmail } from "@/lib/actions/watchlist.actions";
-import { getNews } from "@/lib/actions/finnhub.actions";
+import {getAllUsersForNewsEmail} from "@/lib/queries/user.queries";
+import { getWatchlistSymbolsByEmail } from "@/lib/queries/watchlist.queries";
+import { getNews } from "@/lib/queries/finnhub.queries";
 import { getFormattedTodayDate } from "@/lib/utils";
+import { isUserSubscribed } from "@/lib/queries/email-preference.queries";
 
 export const sendSignUpEmail = inngest.createFunction(
     { id: 'sign-up-email' },
@@ -57,10 +58,22 @@ export const sendDailyNewsSummary = inngest.createFunction(
 
         if(!users || users.length === 0) return { success: false, message: 'No users found for news email' };
 
-        // Step #2: For each user, get watchlist symbols -> fetch news (fallback to general)
+        // Step #2: Filter out unsubscribed users
+        const subscribedUsers = await step.run('filter-subscribed-users', async () => {
+            const filtered: UserForNewsEmail[] = [];
+            for (const user of users as UserForNewsEmail[]) {
+                const subscribed = await isUserSubscribed(user.email);
+                if (subscribed) filtered.push(user);
+            }
+            return filtered;
+        });
+
+        if (subscribedUsers.length === 0) return { success: false, message: 'No subscribed users found for news email' };
+
+        // Step #3: For each user, get watchlist symbols -> fetch news (fallback to general)
         const results = await step.run('fetch-user-news', async () => {
             const perUser: Array<{ user: UserForNewsEmail; articles: MarketNewsArticle[] }> = [];
-            for (const user of users as UserForNewsEmail[]) {
+            for (const user of subscribedUsers) {
                 try {
                     const symbols = await getWatchlistSymbolsByEmail(user.email);
                     let articles = await getNews(symbols);
