@@ -131,7 +131,7 @@ Content guidelines:
 - Explain concepts as if talking to someone new to investing
 - Include specific numbers but explain what they mean in simple terms
 - Add "Bottom Line" context in everyday language anyone can understand
-- Use clean, light design with yellow bullets for better readability
+- Use clean, light design with blue (#164a8b) bullets for better readability
 - Make each article easy to scan with clear spacing and structure
 - Always include simple "Read Full Story" buttons with actual URLs
 - Focus on PRACTICAL insights regular people can understand and use

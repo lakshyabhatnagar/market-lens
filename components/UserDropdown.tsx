@@ -41,7 +41,7 @@ const UserDropdown = ({ user, initialStocks }: {user: User, initialStocks: Stock
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-3 text-gray-4 hover:text-yellow-500">
+                <Button variant="ghost" className="flex items-center gap-3 text-gray-4 hover:text-[#164a8b]">
                     <div className={`${avatarColor} h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0`}>
                         {initial}
                     </div>
@@ -67,7 +67,7 @@ const UserDropdown = ({ user, initialStocks }: {user: User, initialStocks: Stock
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-gray-600"/>
-                <DropdownMenuItem onClick={handleSignOut} className="text-gray-100 text-md font-medium focus:bg-transparent focus:text-yellow-500 transition-colors cursor-pointer">
+                <DropdownMenuItem onClick={handleSignOut} className="text-gray-100 text-md font-medium focus:bg-transparent focus:text-[#164a8b] transition-colors cursor-pointer">
                     <LogOut className="h-4 w-4 mr-2 hidden sm:block" />
                     Logout
                 </DropdownMenuItem>
