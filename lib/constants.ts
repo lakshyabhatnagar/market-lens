@@ -1,7 +1,8 @@
 export const NAV_ITEMS = [
     { href: '/', label: 'Dashboard' },
     { href: '/search', label: 'Search' },
-    // { href: '/watchlist', label: 'Watchlist' },
+    { href: '/watchlist', label: 'Watchlist' },
+    { href: '/about', label: 'About' },
 ];
 
 // Sign-up form select options
@@ -337,3 +338,36 @@ export const WATCHLIST_TABLE_HEADER = [
     'Alert',
     'Action',
 ];
+
+// Watchlist page widgets
+export const WATCHLIST_TICKER_TAPE_CONFIG = (symbols: { proName: string; title: string }[]) => ({
+    symbols,
+    showSymbolLogo: true,
+    isTransparent: true,
+    displayMode: 'adaptive',
+    colorTheme: 'dark',
+    locale: 'en',
+});
+
+export const WATCHLIST_MINI_CHART_CONFIG = (symbol: string) => ({
+    symbol: symbol.toUpperCase(),
+    dateRange: '1M',
+    colorTheme: 'dark',
+    isTransparent: true,
+    locale: 'en',
+    width: '100%',
+    height: 220,
+    trendLineColor: 'rgba(22, 74, 139, 1)',
+    underLineColor: 'rgba(22, 74, 139, 0.15)',
+    underLineBottomColor: 'rgba(22, 74, 139, 0)',
+    noTimeScale: true,
+});
+
+export const WATCHLIST_SYMBOL_INFO_CONFIG = (symbol: string) => ({
+    symbol: symbol.toUpperCase(),
+    colorTheme: 'dark',
+    isTransparent: true,
+    locale: 'en',
+    width: '100%',
+    height: 170,
+});

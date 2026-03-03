@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react"
 import { CommandDialog, CommandEmpty, CommandInput, CommandList } from "@/components/ui/command"
 import {Button} from "@/components/ui/button";
-import {Loader2,  TrendingUp} from "lucide-react";
+import {Loader2, Star, TrendingUp} from "lucide-react";
 import Link from "next/link";
 import {searchStocks} from "@/lib/actions/finnhub.actions";
+import {toggleWatchlist, getWatchlistSymbols} from "@/lib/actions/watchlist.actions";
 import {useDebounce} from "@/hooks/useDebounce";
 
 export default function SearchCommand({ renderAs = 'button', label = 'Add stock', initialStocks }: SearchCommandProps) {
@@ -13,9 +14,19 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(false)
   const [stocks, setStocks] = useState<StockWithWatchlistStatus[]>(initialStocks);
+  const [watchlistedSymbols, setWatchlistedSymbols] = useState<Set<string>>(new Set());
 
   const isSearchMode = !!searchTerm.trim();
   const displayStocks = isSearchMode ? stocks : stocks?.slice(0, 10);
+
+  // Fetch watchlisted symbols when dialog opens
+  useEffect(() => {
+    if (open) {
+      getWatchlistSymbols().then((symbols) => {
+        setWatchlistedSymbols(new Set(symbols.map((s) => s.toUpperCase())));
+      });
+    }
+  }, [open]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -54,6 +65,26 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
     setStocks(initialStocks);
   }
 
+  const handleToggleWatchlist = async (e: React.MouseEvent, symbol: string, name: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const result = await toggleWatchlist(symbol, name);
+      setWatchlistedSymbols((prev) => {
+        const next = new Set(prev);
+        if (result.added) {
+          next.add(symbol.toUpperCase());
+        } else {
+          next.delete(symbol.toUpperCase());
+        }
+        return next;
+      });
+    } catch (err) {
+      console.error('Failed to toggle watchlist:', err);
+    }
+  }
+
   return (
     <>
       {renderAs === 'text' ? (
@@ -83,24 +114,37 @@ export default function SearchCommand({ renderAs = 'button', label = 'Add stock'
                 {isSearchMode ? 'Search results' : 'Popular stocks'}
                 {` `}({displayStocks?.length || 0})
               </div>
-              {displayStocks?.map((stock, i) => (
+              {displayStocks?.map((stock) => (
                   <li key={stock.symbol} className="search-item">
-                    <Link
-                        href={`/stocks/${stock.symbol}`}
-                        onClick={handleSelectStock}
-                        className="search-item-link"
-                    >
-                      <TrendingUp className="h-4 w-4 text-gray-500" />
-                      <div  className="flex-1">
-                        <div className="search-item-name">
-                          {stock.name}
+                    <div className="search-item-link">
+                      <Link
+                          href={`/stocks/${stock.symbol}`}
+                          onClick={handleSelectStock}
+                          className="flex items-center gap-3 flex-1 min-w-0"
+                      >
+                        <TrendingUp className="h-4 w-4 text-gray-500 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="search-item-name">
+                            {stock.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {stock.symbol} | {stock.exchange} | {stock.type}
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {stock.symbol} | {stock.exchange } | {stock.type}
-                        </div>
-                      </div>
-                    {/*<Star />*/}
-                    </Link>
+                      </Link>
+                      <button
+                          onClick={(e) => handleToggleWatchlist(e, stock.symbol, stock.name)}
+                          className="shrink-0 p-1 cursor-pointer hover:scale-110 transition-transform"
+                          title={watchlistedSymbols.has(stock.symbol.toUpperCase()) ? 'Remove from watchlist' : 'Add to watchlist'}
+                      >
+                        <Star
+                            className="h-5 w-5"
+                            fill={watchlistedSymbols.has(stock.symbol.toUpperCase()) ? '#164a8b' : 'none'}
+                            stroke="#164a8b"
+                            strokeWidth={1.5}
+                        />
+                      </button>
+                    </div>
                   </li>
               ))}
             </ul>

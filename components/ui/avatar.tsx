@@ -41,6 +41,7 @@ function AvatarFallback({
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
+      delayMs={0}
       className={cn(
         "bg-muted flex size-full items-center justify-center rounded-full",
         className
